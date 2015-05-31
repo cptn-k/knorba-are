@@ -1,0 +1,7 @@
+<Manifesto>
+  <Load class="PingPongAgent" />
+  <Run class="PingPongAgent" alias="pinger" />
+  <Message target="pinger" opcode="knorba.demo.pingpong.start">
+    <KNothing />
+  </Message>
+</Manifesto>

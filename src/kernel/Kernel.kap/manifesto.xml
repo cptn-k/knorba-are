@@ -1,0 +1,45 @@
+<Manifesto>
+  <Load class="UnixSocketAgent" />
+  <Load class="InternetAgent" />
+  <Load class="ConsoleAgent" />
+  <Load class="DisplayInfoAgent" />
+  <Run class="UnixSocketAgent" alias="usock" />
+  <Run class="InternetAgent" alias="inet" />
+  <Run class="ConsoleAgent" alias="console" />
+  <Run class="DisplayInfoAgent" alias="displayInfo" />
+  <Message target="inet" opcode="knorba.internet.set-address">
+    <KString value="192.168.11.9:2010" />
+  </Message>
+  <Message target="inet" opcode="knorba.internet.add-connection">
+    <KString value="192.168.11.9:2011" />
+  </Message>
+  <Message target="inet" opcode="knorba.internet.add-connection">
+    <KString value="192.168.11.9:2012" />
+  </Message>
+  <Message target="kernel" opcode="knorba.kernel.cluster.set">
+    <KString value="cluster-a" />
+  </Message>
+  <Message target="displayInfo" opcode="knorba.display.setup-a">
+    <KRecord>
+      <KRecord _id="windowOrigin">
+        <KInteger value="10" />
+        <KInteger value="10" />
+      </KRecord>
+      <KGrid _id="displayIndexes">
+        <KRecord>
+          <KRecord _id="index">
+            <KInteger value="0" />
+            <KInteger value="0" />
+          </KRecord>
+          <KRecord _id="size">
+            <KInteger value="400" />
+            <KInteger value="300" />
+          </KRecord>
+        </KRecord>
+      </KGrid>
+    </KRecord>
+  </Message>
+  <Connect source="usock" target="kernel" role="intercom" />
+  <Connect source="inet" target="kernel" role="tunnel" />
+  <Connect source="console" target="kernel" role="console" />
+</Manifesto>

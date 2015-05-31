@@ -1,0 +1,41 @@
+<Manifesto>
+  <Agent name="HelloAgent"      binaryType="native" />
+  <Agent name="HelloPeersAgent" binaryType="native" />
+  <Agent name="TextFileWriter"  binaryType="native" />
+  <Agent name="TextUiAgent"     binaryType="native" />
+  
+  <Run agent="TextFileWriter" alias="fileWriter">
+    <Message opcode="knorba.demo.textfilewriter.set_filename">
+      <KString value="~/hello.txt" />
+    </Message>
+  </Run>
+  
+  <Run agent="TextFileWriter" alias="fileWriter">
+    <Message opcode="knorba.demo.textfilewriter.set_filename">
+      <KString value="~/hello.txt" />
+    </Message>
+  </Run>
+  
+  <Run agent="HelloAgent" alias="helloAgent" />
+  
+  <Run agent="TextUiAgent" alias="gui">
+    <Message opcode="knorba.demo.textuiagent.init">
+      <KNothing/>
+    </Message>
+  </Run>
+  
+  <Run agent="HelloPeersAgent">
+    <Message opcode="knorba.demo.hellopeers.link">
+      <KGUID alias="fileWriter"/>
+    </Message>
+    <Message opcode="knorba.demo.hellopeers.link">
+      <KGUID alias="helloAgent"/>
+    </Message>
+    <Message opcode="knorba.demo.hellopeers.link">
+      <KGUID alias="gui"/>
+    </Message>    
+    <Message opcode="knorba.demo.text.print">
+      <KString value="Hello World!" />
+    </Message>
+  </Run>
+</Manifesto>

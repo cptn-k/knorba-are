@@ -1,0 +1,18 @@
+<Manifesto>
+  <Load class="SingInSyncAgent" />
+  <Run class="SingInSyncAgent" alias="singer" />
+  <Message target="singer" opcode="konrba.demo.sing-in-sync.sing">
+    <KGrid>
+      <KRecord><KString value="There comes a time when we hear a certain call" /></KRecord>
+      <KRecord><KString value="When the world must come together as one" /></KRecord>
+      <KRecord><KString value="There are people dying" /></KRecord>
+      <KRecord><KString value="And its time to lend a hand to life" /></KRecord>
+      <KRecord><KString value="The greatest gift to all" /></KRecord>
+      <KRecord><KString value="We can't go on pretending day by day" /></KRecord>
+      <KRecord><KString value="That someone, somewhere will soon make a change" /></KRecord>
+      <KRecord><KString value="We are all a part of god's great big family" /></KRecord>
+      <KRecord><KString value="And the truth, you know," /></KRecord>
+      <KRecord><KString value="Love is all we need" /></KRecord>
+    </KGrid>
+  </Message>
+</Manifesto>

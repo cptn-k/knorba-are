@@ -1,0 +1,7 @@
+<Manifesto>
+  <Load class="PicServerAgent" />
+  <Run class="PicServerAgent" alias="gui" />
+  <Message target="gui" opcode="knorba.demo.pic.server.start">
+    <KNothing />
+  </Message>
+</Manifesto>

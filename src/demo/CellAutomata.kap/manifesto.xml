@@ -1,0 +1,24 @@
+<Manifesto>
+  <Load class="CellAutomataAgent" />
+  <Load class="UiGridOutputAgent" />
+  
+  <Run class="CellAutomataAgent" alias="automaton" />
+  <Run class="UiGridOutputAgent" alias="gui" />
+  
+  <Message target="gui" opcode="knorba.demo.ui-grid-output.start">
+    <KNothing />
+  </Message>
+  
+  <Message target="automaton" opcode="knorba.demo.cell-automata.set-delay">
+    <KInteger value="100" />
+  </Message>
+  
+  <Message target="automaton" opcode="knorba.demo.cell-automata.start">
+    <KRecord>
+      <KInteger value="49"/>
+      <KInteger value="31"/>
+    </KRecord>
+  </Message>
+  
+  <Connect source="gui" target="automaton" role="output" />
+</Manifesto>

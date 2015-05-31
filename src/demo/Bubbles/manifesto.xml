@@ -1,0 +1,8 @@
+<Manifesto>
+  <Agent name="BubblesAgent"/>
+  <Run agent="BubblesAgent">
+    <Message opcode="bubbleagent.link_output">
+      <KNothing/>
+    </Message>
+  </Run>
+</Manifesto>

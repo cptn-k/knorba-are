@@ -1,0 +1,7 @@
+<Manifesto>
+  <Load class="HelloAgent" />
+  <Run class="HelloAgent" alias="bimo" />
+  <Message target="bimo" opcode="demo.hello.say">
+    <KNothing />
+  </Message>
+</Manifesto>

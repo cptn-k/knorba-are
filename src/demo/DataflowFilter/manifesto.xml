@@ -1,0 +1,24 @@
+<Manifesto>
+  <Load class="ImageLoaderAgent" />
+  <Load class="LinearBlurAgent" />
+  <Load class="ImageSaverAgent" />
+
+  <Run class="ImageLoaderAgent" alias="source" />
+  <Run class="LinearBlurAgent" alias="filter" />
+  <Run class="ImageSaverAgent" alias="sink" />
+
+  <Message target="source" opcode="dataflow.loader.set-file">
+    <KString value="/file/path/name.png" />
+  </Message>
+
+  <Message target="sink" opcode="dataflow.saver.set-file">
+    <KString value="/file/path/output.png" />
+  </Message>
+
+  <Message target="sink" opcode="dataflow.saver.start">
+    <KNothing/>
+  </Message>
+
+  <Connect source="source" targer="filter" role="input" />
+  <Connect source="filter" target="sink" role="input" />
+</Manifesto>

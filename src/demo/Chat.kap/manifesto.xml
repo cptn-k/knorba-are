@@ -1,0 +1,4 @@
+<Manifesto>
+  <Load class="ChatAgent" />
+  <Run class="ChatAgent" alias="chatter" />
+</Manifesto>

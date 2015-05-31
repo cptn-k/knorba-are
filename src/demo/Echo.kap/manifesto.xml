@@ -1,0 +1,4 @@
+<Manifesto>
+  <Load class="EchoAgent" />
+  <Run class="EchoAgent" alias="echo" />
+</Manifesto>

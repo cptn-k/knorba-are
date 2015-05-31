@@ -1,0 +1,8 @@
+<Manifesto>
+  <Load class="UnixSocketAgent" />
+  <Load class="ConsoleAgent" />
+  <Run class="UnixSocketAgent" alias="usock" />
+  <Run class="ConsoleAgent" alias="console" />
+  <Connect source="usock" target="kernel" role="intercom" />
+  <Connect source="console" target="kernel" role="console" />
+</Manifesto>
