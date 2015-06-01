@@ -22,7 +22,7 @@
 #include <knorba/type/all.h>
 
 // Internal
-#include "kernel/KernelAgent/KernelAgent.h"
+#include "../kernel/KernelAgent/KernelAgent.h"
 #include "AgentInstance.h"
 #include "VirtualRuntime.h"
 #include "DynamicAgentLoader.h"

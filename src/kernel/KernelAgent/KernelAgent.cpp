@@ -18,11 +18,11 @@
 #include <knorba/protocol/TunnelingProtocol.h>
 
 // Internal
-#include "are/KernelRuntime.h"
-#include "kernel/UnixSocketAgent/UnixSocketAgent.h"
-#include "are/Bundle.h"
-#include "are/AreException.h"
-#include "are/VirtualRuntime.h"
+#include "../../are/KernelRuntime.h"
+#include "../../are/Bundle.h"
+#include "../../are/AreException.h"
+#include "../../are/VirtualRuntime.h"
+#include "../UnixSocketAgent/UnixSocketAgent.h"
 
 // Self
 #include "KernelAgent.h"
