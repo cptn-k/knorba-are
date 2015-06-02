@@ -289,7 +289,7 @@ namespace are {
     while(isActive() && !_closing) {
       _agentQuitCond.block();
       cleanup();
-      logBlockingAgents(LOG << "Quit signal received. Active agent(s):");
+      logBlockingAgents(LOG << "Active agent(s):");
     }
   }
   

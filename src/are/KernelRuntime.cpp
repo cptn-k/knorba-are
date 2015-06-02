@@ -164,6 +164,14 @@ namespace are {
   void KernelRuntime::kernelRunBundle(int pid, const string& bundle) {
     _kernelAgent->kernelRunBundle(pid, bundle);
   }
+  
+  
+  void KernelRuntime::runBundleInMainThread(PPtr<VirtualRuntime> rt, PPtr<Bundle> b) {
+    _runParam = new RunParam();
+    _runParam->rt = rt;
+    _runParam->bundle = b;
+    signalQuit();
+  }
 
   
   PPtr<VirtualRuntime> KernelRuntime::newVirtualRuntime(const k_guid_t& guid) {
@@ -270,6 +278,17 @@ namespace are {
   
   
   void KernelRuntime::cleanup() {
+    if(!_runParam.isNull()) {
+      try {
+        _runParam->rt->runBundle(_runParam->bundle);
+      } catch (KFException& e) {
+        LOG_ERR << e.getMessage() << EL;
+        LOG << e << EL;
+      }
+      _runParam = NULL;
+      return;
+    }
+    
     for(int i = _virtualRuntimes->getSize() - 1; i >= 0; i--) {
       if(!_virtualRuntimes->at(i)->isAlive()) {
         k_guid_t guid = _virtualRuntimes->at(i)->getGuid();

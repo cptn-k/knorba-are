@@ -41,6 +41,14 @@ namespace are {
   
   class KernelRuntime: public RuntimeBase {
     
+  // --- NESTED TYPES --- //
+    
+    private: class RunParam : public ManagedObject {
+      public: PPtr<VirtualRuntime> rt;
+      public: Ptr<Bundle> bundle;
+    };
+    
+    
   // --- STATIC FIELDS --- //
     
     private: static SPtr<KRecordType> PID_FILE_T;
@@ -56,6 +64,7 @@ namespace are {
     
     private: bool _closing;
     private: KernelAgent* _kernelAgent;
+    private: Ptr<RunParam> _runParam;
     private: ObjectPoolMemoryManager<Message> _messagePool;
     private: Ptr<FileOutputStream> _pidFile;
     private: Ptr< ManagedArray<VirtualRuntime> > _virtualRuntimes;
@@ -77,6 +86,7 @@ namespace are {
     public: void kernelRestart(int pid);
     public: void kernelPrintStatus(int pid);
     public: void kernelRunBundle(int pid, const string& bundle);
+    public: void runBundleInMainThread(PPtr<VirtualRuntime> rt, PPtr<Bundle> b);
     public: PPtr<VirtualRuntime> newVirtualRuntime(const k_guid_t& guid);
     public: Ptr<Message> newMessage();
     public: void deliver(const k_guid_t& receiver, PPtr<Message> msg);
