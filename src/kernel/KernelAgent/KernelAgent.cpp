@@ -342,12 +342,14 @@ namespace are {
     vrt->setConsole(console);
     vrt->setNodeCount(nNodes);
     
-    try {
-      vrt->runBundle(bundle);
-    } catch (KFException& e) {
-      ALOG_ERR << e.getMessage() << EL;
-      ALOG << e << EL;
-    }
+//    try {
+//      vrt->runBundle(bundle);
+//    } catch (KFException& e) {
+//      ALOG_ERR << e.getMessage() << EL;
+//      ALOG << e << EL;
+//    }
+    
+    _rt.runBundleInMainThread(vrt, bundle);
   }
   
   
