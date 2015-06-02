@@ -3,13 +3,13 @@ project (Hello)
 
 set(CMAKE_VERBOSE_MAKEFILE off)
 
-set(CMAKE_CXX_FLAGS "-fPIC -fvisibility=hidden -rdynamic")
+set(CMAKE_CXX_FLAGS "-fPIC -fvisibility=hidden -rdynamic -Wl,--whole-archive -lknorba -Wl,--no-whole-archive")
 set(CMAKE_EXE_LINKER_FLAGS "-ldl")
 
 include_directories(SYSTEM /usr/local/include)
 link_directories(/usr/local/lib)
 
-set(LIBS knorba kfoundation cityhash unistring KnorbaStandardProtocols)
+set(LIBS kfoundation cityhash unistring KnorbaStandardProtocols)
 
 add_library (HelloAgent SHARED
   HelloAgent.cpp)
