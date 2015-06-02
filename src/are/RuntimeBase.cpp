@@ -43,7 +43,7 @@ namespace are {
    * Primary constructor
    */
   RuntimeBase::RuntimeBase(PPtr<Path> knorbaHome, const k_guid_t& guid)
-  : _agentQuitCond(false)
+  : _agentQuitCond(true)
   {
     _nodeCount = 1;
     _closing = false;

@@ -279,6 +279,7 @@ namespace are {
   
   void KernelRuntime::cleanup() {
     if(!_runParam.isNull()) {
+      cout << Thread::getNameOfCurrentThread() << endl;
       try {
         _runParam->rt->runBundle(_runParam->bundle);
       } catch (KFException& e) {

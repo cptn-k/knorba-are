@@ -72,11 +72,13 @@ namespace are {
       close();
     }
     
+    shutdown(_hostSocket, SHUT_RDWR);
+    ::close(_hostSocket);
+
     _path->remove();
     _path = NULL;
     
     _isBound = false;
-    ::close(_hostSocket);
   }
   
   
