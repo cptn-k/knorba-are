@@ -13,7 +13,7 @@
 #include <knorba/Agent.h>
 
 // Internal
-#include "ConsoleProtocolClient.h"
+#include <knorba/protocol/ConsoleProtocolClient.h>
 
 // Self
 #include "PicClientAgent.h"
