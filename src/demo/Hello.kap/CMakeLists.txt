@@ -3,8 +3,8 @@ project (Hello)
 
 set(CMAKE_VERBOSE_MAKEFILE off)
 
-set(CMAKE_CXX_FLAGS "-fPIC -fvisibility=hidden")
-set(CMAKE_EXE_LINKER_FLAGS "-ldl -rdynamic")
+set(CMAKE_CXX_FLAGS "-fPIC -fvisibility=hidden -rdynamic")
+set(CMAKE_EXE_LINKER_FLAGS "-ldl")
 
 include_directories(SYSTEM /usr/local/include)
 link_directories(/usr/local/lib)
