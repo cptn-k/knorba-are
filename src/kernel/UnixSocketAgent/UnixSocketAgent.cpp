@@ -6,6 +6,9 @@
 //  Copyright (c) 2015 Kay Khandan. All rights reserved.
 //
 
+// Std
+#include <cstdlib>
+
 // Unix
 #include <sys/socket.h>
 #include <sys/un.h>

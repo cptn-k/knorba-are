@@ -6,6 +6,9 @@
 //  Copyright (c) 2015 Kay Khandan. All rights reserved.
 //
 
+// Std
+#include <cstdlib>
+
 // KFoundation
 #include <kfoundation/Ptr.h>
 #include <kfoundation/Thread.h>
