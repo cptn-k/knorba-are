@@ -44,6 +44,7 @@ namespace are {
     
     _handle = dlopen(_binary->getString().c_str(), RTLD_LAZY);
     if(_handle == NULL) {
+      perror("dlopen()");
       throw AreException("Unable to load agent binary " + _binary->getString());
     }
     

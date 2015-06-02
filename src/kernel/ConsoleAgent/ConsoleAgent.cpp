@@ -6,6 +6,9 @@
 //  Copyright (c) 2015 Kay Khandan. All rights reserved.
 //
 
+// Std
+#include <cstdlib>
+
 // KFoundation
 #include <kfoundation/Ptr.h>
 #include <kfoundation/ManagedArray.h>
@@ -155,7 +158,7 @@ void ConsoleAgent::promptLoop() {
         printInput();
       }
     } else if(ch == 127 || ch == 8) {
-      _input.pop_back();
+      _input.erase(_input.size() - 1, 1);
       printInput();
     } else {
       _input.push_back(ch);

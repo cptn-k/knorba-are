@@ -3,8 +3,8 @@ project (KnoRBA-ARE)
 
 set(CMAKE_VERBOSE_MAKEFILE off)
 
-set(CMAKE_CXX_FLAGS "-fPIC -fvisibility=hidden")
-set(CMAKE_EXE_LINKER_FLAGS "-ldl -rdynamic")
+set(CMAKE_CXX_FLAGS "-fPIC -fvisibility=hidden -pthread -rdynamic")
+set(CMAKE_EXE_LINKER_FLAGS "-ldl")
 include_directories(SYSTEM /usr/local/include)
 include_directories(src)
 link_directories(/usr/local/lib)
@@ -73,8 +73,7 @@ file(MAKE_DIRECTORY ${POOL_DIR})
 
 # //\/ UnixSocketAgent /\//////////////////////////////////////////////////////
 
-add_library(UnixSocketAgent
-  SHARED
+add_library(UnixSocketAgent  SHARED
   src/kernel/UnixSocketAgent/UnixSocketInputStream.cpp
   src/kernel/UnixSocketAgent/UnixSocketOutputStream.cpp
   src/kernel/UnixSocketAgent/UnixSocketAgent.cpp)
@@ -90,8 +89,7 @@ set_target_properties(UnixSocketAgent
 
 # //\/ InternetAgent /\////////////////////////////////////////////////////////
 
-add_library(InternetAgent
-  SHARED
+add_library(InternetAgent SHARED
   src/kernel/InternetAgent/InternetAgent.cpp)
 
 target_link_libraries(InternetAgent
@@ -105,8 +103,7 @@ set_target_properties(InternetAgent
 
 # //\/ ConsoleAgent /\/////////////////////////////////////////////////////////
 
-add_library(ConsoleAgent
-  SHARED
+add_library(ConsoleAgent SHARED
   src/kernel/ConsoleAgent/ConsoleAgent.cpp)
 
 target_link_libraries(ConsoleAgent
@@ -121,8 +118,7 @@ set_target_properties(ConsoleAgent
 
 # //\/ DisplayInfoAgent /\/////////////////////////////////////////////////////
 
-add_library(DisplayInfoAgent
-  SHARED
+add_library(DisplayInfoAgent SHARED
   src/kernel/DisplayInfoAgent/DisplayInfoAgent.cpp)
 
 target_link_libraries(DisplayInfoAgent
@@ -130,8 +126,8 @@ target_link_libraries(DisplayInfoAgent
 
 set_target_properties(DisplayInfoAgent
   PROPERTIES
-  LIBRARY_OUTPUT_DIRECTORY ${POOL_DIR}
-  PREFIX "")
+    LIBRARY_OUTPUT_DIRECTORY ${POOL_DIR}
+    PREFIX "")
 
 
 
