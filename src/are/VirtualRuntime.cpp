@@ -31,6 +31,7 @@ namespace are {
     _owner(owner)
   {
     _closing = false;
+    _readyToDelete = false;
     _console = KGlobalUid::zero();
     LOG << "(O) Virtual Runtime " << guid << EL;
   }
@@ -59,11 +60,18 @@ namespace are {
   void VirtualRuntime::shutdown() {
     _closing = true;
     RuntimeBase::shutdown();
+    _readyToDelete = true;
+    _owner.signalQuit();
   }
   
   
   void VirtualRuntime::setConsole(const k_guid_t& console) {
     _console = console;
+  }
+  
+  
+  bool VirtualRuntime::isReadyToDelete() const {
+    return _readyToDelete;
   }
   
 
@@ -86,14 +94,17 @@ namespace are {
   
   
   bool VirtualRuntime::isAlive() const {
-    return RuntimeBase::isAlive() || !_closing;
+    return RuntimeBase::isAlive();
   }
   
   
   void VirtualRuntime::signalQuit() {
+    if(_closing) {
+      return;
+    }
+    
     if(!isActive()) {
       shutdown();
-      _owner.signalQuit();
     }
   }
   

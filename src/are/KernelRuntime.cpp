@@ -246,6 +246,9 @@ namespace are {
     deliver(guid, msg);
   }
 
+  void KernelRuntime::signalQuit() {
+    RuntimeBase::signalQuit();
+  }
   
   bool KernelRuntime::isAlive() const {
     if(RuntimeBase::isAlive()) {
@@ -291,7 +294,7 @@ namespace are {
     }
     
     for(int i = _virtualRuntimes->getSize() - 1; i >= 0; i--) {
-      if(!_virtualRuntimes->at(i)->isAlive()) {
+      if(_virtualRuntimes->at(i)->isReadyToDelete()) {
         k_guid_t guid = _virtualRuntimes->at(i)->getGuid();
         _virtualRuntimes->remove(i);
         if(!_closing) {

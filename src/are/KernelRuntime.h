@@ -104,6 +104,7 @@ namespace are {
     public: void sendFromAre(const k_guid_t& guid, PPtr<KString> opcode,
         PPtr<KValue> payload);
     
+    public: void signalQuit();
     public: bool isAlive() const;
     public: bool isActive() const;
     public: void cleanup();

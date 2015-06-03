@@ -24,6 +24,7 @@ namespace are {
     private: KernelRuntime& _owner;
     private: k_guid_t _console;
     private: bool _closing;
+    private: bool _readyToDelete;
 
         
   // --- (DE)CONSTRUCTORS --- //
@@ -40,6 +41,7 @@ namespace are {
     private: void deliver(const k_guid_t& receiver, PPtr<Message> msg);
     public: void shutdown();
     public: void setConsole(const k_guid_t& console);
+    public: bool isReadyToDelete() const;
     
     // Inherited from RuntimeBase
     public: Ptr<AgentLoader> createLoaderFor(PPtr<Path> kap, const string& className);

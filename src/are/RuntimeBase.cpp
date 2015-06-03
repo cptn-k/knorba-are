@@ -329,9 +329,9 @@ namespace are {
     
     int counter = 0;
     while(isAlive()) {
-      System::sleep(1000);
+      System::sleep(200);
       counter++;
-      if(counter == 5) {
+      if(counter == 25) {
         logBlockingAgents(LOG_ERR << "Shutdown blocked by these agent(s):");
       }
     }
