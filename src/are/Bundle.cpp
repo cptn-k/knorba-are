@@ -218,10 +218,6 @@ namespace are {
   void Bundle::pack() {
     Ptr<Path> md5File = _kar->changeExtension("md5");
     
-    if(!_srcIsKap) {
-      cout << "KAR" << EL;
-    }
-    
     if(_srcIsKap) {
       compress(_src, _kar);
     } else {
