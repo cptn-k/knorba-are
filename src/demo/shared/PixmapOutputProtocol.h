@@ -63,9 +63,7 @@ class PixmapOutputProtocol : public Protocol {
   
 // --- METHODS --- //
   
-  public: Ptr<Group> findLocalServers();
-  public: void addConnection(const k_guid_t& guid);
-  public: void addConnections(PPtr<Group> group);
+  public: void setFormat(output_format_t f);
   public: void put(k_integer_t phase, PPtr<KGrid> data);
   public: void tput(k_integer_t phase, PPtr<KGrid> data);
 };

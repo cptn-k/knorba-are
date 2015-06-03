@@ -150,7 +150,9 @@ void ConsoleAgent::promptLoop() {
         _quitOnCommand = true;
         quit();
       } else {
+        wattron(_inputWindow, COLOR_PAIR(2));
         wprintw(_outputWindow, "> %s\n", _input.c_str());
+        wattroff(_inputWindow, COLOR_PAIR(2));
         wrefresh(_outputWindow);
         _logger.log(Logger::L3) << "> " << _input << EL;
         sendInput();
@@ -209,7 +211,6 @@ void ConsoleAgent::printInput() {
   wattron(_inputWindow, COLOR_PAIR(2));
   wprintw(_inputWindow, "> ");
   wattroff(_inputWindow, COLOR_PAIR(2));
-  
   wprintw(_inputWindow, _input.c_str());
   wrefresh(_inputWindow);
 }

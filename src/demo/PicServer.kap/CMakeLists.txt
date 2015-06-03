@@ -22,17 +22,13 @@ file(MAKE_DIRECTORY ${DIST_DIR}/resources)
 configure_file(manifesto.xml ${DIST_DIR} COPYONLY)
 
 
-# //\/ PicUI /\////////////////////////////////////////////////////////////////
-
-add_custom_command (TARGET PicServerAgent POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/../java/PicUI/dist/GridUI.jar ${DIST_DIR}/resources)
-
-
-# //\/ demo: UiGridOutputAgent /\//////////////////////////////////////////////
+# //\/ demo: PicServerAgent /\//////////////////////////////////////////////
 
 add_library (PicServerAgent SHARED
   PicServerAgent.cpp
-  PicProtocol.cpp)
+  PicProtocol.cpp
+  ../shared/Point.cpp
+  ../shared/Rectangle.cpp)
 
 target_link_libraries (PicServerAgent
   ${LIBS})
@@ -47,7 +43,9 @@ set_target_properties (PicServerAgent
 
 add_library (PicClientAgent SHARED
   PicClientAgent.cpp
-  PicProtocol.cpp)
+  PicProtocol.cpp
+  ../shared/Point.cpp
+  ../shared/Rectangle.cpp)
 
 target_link_libraries (PicClientAgent
   ${LIBS})
@@ -56,3 +54,9 @@ set_target_properties (PicClientAgent
   PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${DIST_DIR}/bin
     PREFIX "")
+
+
+# //\/ PicUI /\////////////////////////////////////////////////////////////////
+
+add_custom_command (TARGET PicServerAgent POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/../java/PicUI/dist/PicUI.jar ${DIST_DIR}/resources)

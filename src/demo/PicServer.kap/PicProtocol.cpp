@@ -14,8 +14,8 @@
 #include <knorba/type/all.h>
 
 // Internal
-#include "Point.h"
-#include "Rectangle.h"
+#include "../shared/Point.h"
+#include "../shared/Rectangle.h"
 
 // Self
 #include "PicProtocol.h"
@@ -26,11 +26,13 @@ using namespace demo;
 
 SPtr<KRecordType> PicProtocol::LOAD_T;
 SPtr<KRecordType> PicProtocol::PUT_T;
+SPtr<KRecordType> PicProtocol::UNPUT_T;
 
 const SPtr<KString> PicProtocol::OP_LOAD = KS("knorba.demo.pic.load");
 const SPtr<KString> PicProtocol::OP_PUT = KS("knorba.demo.pic.put");
 const SPtr<KString> PicProtocol::OP_UNPUT = KS("konrba.demo.pic.unput");
 const SPtr<KString> PicProtocol::OP_CLEAR = KS("knorba.demo.pic.clear");
+const SPtr<KString> PicProtocol::OP_QUIT = KS("knorba.demo.pic.quit");
 
 
 // --- STATIC METHODS --- //
@@ -38,7 +40,8 @@ const SPtr<KString> PicProtocol::OP_CLEAR = KS("knorba.demo.pic.clear");
 SPtr<KRecordType> PicProtocol::load_t() {
   if(LOAD_T.isNull()) {
     LOAD_T = new KRecordType("knorba.demo.pic.Load");
-    LOAD_T->addField("reference", KType::INTEGER)
+    LOAD_T->addField("relay", KType::TRUTH)
+          ->addField("reference", KType::INTEGER)
           ->addField("fileName", KType::STRING)
           ->addField("data", KType::RAW);
   }
@@ -49,16 +52,28 @@ SPtr<KRecordType> PicProtocol::load_t() {
 SPtr<KRecordType> PicProtocol::put_t() {
   if(PUT_T.isNull()) {
     PUT_T = new KRecordType("knorba.demo.pic.Put");
-    PUT_T->addField("reference", KType::INTEGER)
+    PUT_T->addField("relay", KType::TRUTH)
+         ->addField("reference", KType::INTEGER)
          ->addField("area", Rectangle::type().AS(KType));
   }
   return PUT_T;
 }
 
 
+SPtr<KRecordType> PicProtocol::unput_t() {
+  if(UNPUT_T.isNull()) {
+    UNPUT_T = new KRecordType("knorba.demo.pic.Unput");
+    UNPUT_T->addField("relay", KType::TRUTH)
+           ->addField("reference", KType::INTEGER);
+  }
+  return UNPUT_T;
+}
+
+
 void PicProtocol::init(Runtime& r) {
   r.registerMessageFormat(OP_LOAD, load_t().AS(KType));
   r.registerMessageFormat(OP_PUT, put_t().AS(KType));
-  r.registerMessageFormat(OP_UNPUT, KType::INTEGER);
+  r.registerMessageFormat(OP_UNPUT, unput_t().AS(KType));
   r.registerMessageFormat(OP_CLEAR, KType::NOTHING);
+  r.registerMessageFormat(OP_QUIT, KType::TRUTH);
 }

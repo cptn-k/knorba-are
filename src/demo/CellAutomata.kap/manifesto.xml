@@ -10,13 +10,14 @@
   </Message>
   
   <Message target="automaton" opcode="knorba.demo.cell-automata.set-delay">
-    <KInteger value="100" />
+    <KInteger value="200" />
   </Message>
   
   <Message target="automaton" opcode="knorba.demo.cell-automata.start">
     <KRecord>
-      <KInteger value="49"/>
-      <KInteger value="31"/>
+      <KEnumeration value="brain" />
+      <KInteger value="60"/>
+      <KInteger value="40"/>
     </KRecord>
   </Message>
   

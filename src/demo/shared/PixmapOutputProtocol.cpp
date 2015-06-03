@@ -76,7 +76,14 @@ PixmapOutputProtocol::PixmapOutputProtocol(Agent* owner,
 {
   _serverRole = serverRole;
   _payload = new KRecord(put_t());
-  _payload->setEnumeration(PUT_T_FORMAT, (k_octet_t)outputFormat);
+  setFormat(outputFormat);
+}
+
+
+// --- METHODS --- //
+
+void PixmapOutputProtocol::setFormat(output_format_t f) {
+  _payload->setEnumeration(PUT_T_FORMAT, (k_octet_t)f);
 }
 
 

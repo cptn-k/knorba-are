@@ -34,7 +34,7 @@
 KF_EXPORT
 void init(Runtime& rt) {
   rt.registerMessageFormat(CellAutomataAgent::OP_START,
-      KPoint::type().AS(KType));
+      CellAutomataAgent::start_t().AS(KType));
   
   rt.registerMessageFormat(CellAutomataAgent::OP_PARTITION,
       CellAutomataAgent::partition_map_t().AS(KType));
@@ -219,6 +219,23 @@ void CellAutomataAgent::PGrouping::onAllMembersConnected() {
 }
 
 
+//\/ CellAutomataAgent::PConsole /\////////////////////////////////////////////
+
+CellAutomataAgent::PConsole::PConsole(Agent* agent)
+: ConsoleProtocolClient(agent)
+{
+  // Nothing;
+}
+
+
+void CellAutomataAgent::PConsole::onInputReceived(PPtr<KString> str) {
+  if(str->equals("quit")) {
+    _agent->quit();
+    print("Quitting");
+  }
+}
+
+
 //\/ CellAutomataAgent::ComputeThread /\///////////////////////////////////////
 
 CellAutomataAgent::ComputeThread::ComputeThread(CellAutomataAgent& agent)
@@ -239,6 +256,7 @@ void CellAutomataAgent::ComputeThread::run() {
 
 // --- STATIC FIELDS --- //
 
+SPtr<KRecordType> CellAutomataAgent::START_T;
 SPtr<KGridType> CellAutomataAgent::PARTITION_MAP_T;
 SPtr<KGridType> CellAutomataAgent::CELL_GRID_T;
 SPtr<KRecordType> CellAutomataAgent::BORDER_T;
@@ -260,6 +278,21 @@ const SPtr<KString> CellAutomataAgent::R_OUTPUT = KS("output");
 
 
 // --- STATIC METHODS --- //
+
+SPtr<KRecordType> CellAutomataAgent::start_t() {
+  if(START_T.isNull()) {
+    Ptr<KEnumerationType> problemType = new KEnumerationType("knorba.demo.cell-automata.Problem");
+    problemType->addMember(LIFE, "life");
+    problemType->addMember(BRAIN, "brain");
+    problemType->addMember(ANT, "ant");
+    START_T = new KRecordType("knorba.demo.cell-automata.Start");
+    START_T->addField("problem", problemType.AS(KType))
+            ->addField("width", KType::INTEGER)
+            ->addField("height", KType::INTEGER);
+  }
+  return START_T;
+}
+
 
 SPtr<KGridType> CellAutomataAgent::partition_map_t() {
   if(PARTITION_MAP_T.isNull()) {
@@ -350,13 +383,19 @@ CellAutomataAgent::CellAutomataAgent(Runtime& rt, const k_guid_t& guid)
   _pDisplayInfo(this, R_MATE),
   _pConsole(this),
   _pPixmap(this, PixmapOutputProtocol::BLACK_AND_WHITE, R_OUTPUT),
-  _borderCond(false)
+  _borderCond(false),
+  _antLocation(2)
 {
+  _pConsole.setServer(rt.getConsoleGuid());
+  _pConsole.subscribe();
+  
   _delay = 200;
+  _problem = ANT;
   _stopFlag = false;
   _pConsole.setServer(getRuntime().getConsoleGuid());
   _computeThread = new ComputeThread(*this);
   _neighbours = new ManagedArray<Partition>();
+  
   registerHandler((handler_t)&CellAutomataAgent::handleOpStart, OP_START);
   registerHandler((handler_t)&CellAutomataAgent::handleOpPartition, OP_PARTITION);
   registerHandler((handler_t)&CellAutomataAgent::handleOpBorder, OP_BORDER);
@@ -417,21 +456,10 @@ void CellAutomataAgent::setupLayers() {
   ALOG << "localRect: " << localRect << EL;
   ALOG << "computeRange: " << _computeRange << EL;
   
-  _layer1 = new KGridBasic(cell_grid_t(), memorySize);
-  _layer2 = new KGridBasic(cell_grid_t(), memorySize);
+  _layer1 = new KGridBasic(cell_grid_t(), memorySize, true);
+  _layer2 = new KGridBasic(cell_grid_t(), memorySize, true);
   
-  Ptr<KRecord> rec1 = new KRecord(_layer1.AS(KGrid));
-  Ptr<KRecord> rec2 = new KRecord(_layer2.AS(KGrid));
-  
-  // Randomizing layer1
-  for(RangeIterator i(memorySize); i.hasMore(); i.next()) {
-    if(_computeRange.contains(i)) {
-      _layer1->at(i, rec1)->setOctet(rand()%2);
-    } else {
-      _layer1->at(i, rec1)->setOctet(0);
-    }
-    _layer2->at(i, rec2)->setOctet(0);
-  }
+  evaluate(_layer2, _layer1, 0);
   
   // Setup Neighbours
   for(int i = _neighbours->getSize() - 1; i >= 0; i--) {
@@ -450,17 +478,13 @@ void CellAutomataAgent::setupLayers() {
 void CellAutomataAgent::computeLoop() {
   _readFromLayer1 = true;
   
-  Ptr<KRecord> rec1 = new KRecord(_layer1.AS(KGrid));
-  Ptr<KRecord> rec2 = new KRecord(_layer2.AS(KGrid));
   PPtr<KGridBasic> readLayer = _layer1;
   PPtr<KGridBasic> writeLayer = _layer2;
-  PPtr<KRecord> readRec = rec1;
-  PPtr<KRecord> writeRec = rec2;
 
   Ptr<KGridWindow> displayWindow
       = new KGridWindow(_layer1.AS(KGrid), _computeRange);
 
-  int phase = 0;
+  int phase = 1;
   ProximityIterator j(1);
   
   while(!_stopFlag) {
@@ -471,46 +495,171 @@ void CellAutomataAgent::computeLoop() {
     
     System::sleep(_delay);
     
-    // Iterating over data
-    for(RangeIterator i(_computeRange); i.hasMore(); i.next()) {
-      int n = 0;
-      for(j.centerAt(i); j.hasMore(); j.next()) {
-        if(!j.equals(i)) {
-          n += readLayer->at(j, readRec)->getOctet();
-        }
-      }
-      
-      // Evaluating Conway's game of life
-      bool isLiving = readLayer->at(i, readRec)->getOctet();
-      if(n < 2 && isLiving) {
-        writeLayer->at(i, writeRec)->setOctet(0);
-      } else if(isLiving && (n == 2 || n == 3)) {
-        writeLayer->at(i, writeRec)->setOctet(1);
-      } else if(isLiving && n > 3) {
-        writeLayer->at(i, writeRec)->setOctet(0);
-      } else if(!isLiving && n == 3) {
-        writeLayer->at(i, writeRec)->setOctet(1);
-      } else {
-        writeLayer->at(i, writeRec)->setOctet(isLiving);
-      }
-    }
-    
+    evaluate(readLayer, writeLayer, phase);
     
     _readFromLayer1 = !_readFromLayer1;
     
     if(_readFromLayer1) {
       readLayer = _layer1;
       writeLayer = _layer2;
-      readRec = rec1;
-      writeRec = rec2;
     } else {
       readLayer = _layer2;
       writeLayer = _layer1;
-      readRec = rec2;
-      writeRec = rec1;
     }
     
     phase++;
+  }
+}
+
+
+void CellAutomataAgent::evaluate(PPtr<KGridBasic> readLayer,
+    PPtr<KGridBasic> writeLayer, int phase)
+{
+  switch (_problem) {
+    case LIFE:
+      gameOfLife(readLayer, writeLayer, phase);
+      break;
+      
+    case BRAIN:
+      brianBrain(readLayer, writeLayer, phase);
+      break;
+      
+    case ANT:
+      ant(readLayer, writeLayer, phase);
+      break;
+      
+    default:
+      break;
+  }
+}
+
+
+void CellAutomataAgent::brianBrain(PPtr<KGridBasic> readLayer,
+    PPtr<KGridBasic> writeLayer, int phase)
+{
+  Ptr<KRecord> readRec = new KRecord(readLayer.AS(KGrid));
+  Ptr<KRecord> writeRec = new KRecord(writeLayer.AS(KGrid));
+  
+  if(phase == 0) {
+    for(RangeIterator i(_computeRange); i.hasMore(); i.next()) {
+      _layer1->at(i, writeRec)->setOctet(rand()%3);
+    }
+    return;
+  }
+  
+  ProximityIterator j(1);
+  for(RangeIterator i(_computeRange); i.hasMore(); i.next()) {
+    int n = 0;
+    for(j.centerAt(i); j.hasMore(); j.next()) {
+      if(!j.equals(i)) {
+        n += (readLayer->at(j, readRec)->getOctet() == 2);
+      }
+    }
+    
+    k_octet_t state = readLayer->at(i, readRec)->getOctet();
+    if(state == 0 && n == 2) {
+      writeLayer->at(i, writeRec)->setOctet(2);
+    } else if(state == 2) {
+      writeLayer->at(i, writeRec)->setOctet(1);
+    } else if(state == 1) {
+      writeLayer->at(i, writeRec)->setOctet(0);
+    } else {
+      writeLayer->at(i, writeRec)->setOctet(state);
+    }
+  }
+}
+
+
+void CellAutomataAgent::gameOfLife(PPtr<KGridBasic> readLayer,
+    PPtr<KGridBasic> writeLayer, int phase)
+{
+  Ptr<KRecord> readRec = new KRecord(readLayer.AS(KGrid));
+  Ptr<KRecord> writeRec = new KRecord(writeLayer.AS(KGrid));
+  
+  if(phase == 0) {
+    for(RangeIterator i(_computeRange); i.hasMore(); i.next()) {
+      _layer1->at(i, writeRec)->setOctet(rand()%2);
+    }
+    return;
+  }
+  
+  ProximityIterator j(1);
+  for(RangeIterator i(_computeRange); i.hasMore(); i.next()) {
+    int n = 0;
+    for(j.centerAt(i); j.hasMore(); j.next()) {
+      if(!j.equals(i)) {
+        n += readLayer->at(j, readRec)->getOctet();
+      }
+    }
+    
+    bool isLiving = readLayer->at(i, readRec)->getOctet();
+    if(n < 2 && isLiving) {
+      writeLayer->at(i, writeRec)->setOctet(0);
+    } else if(isLiving && (n == 2 || n == 3)) {
+      writeLayer->at(i, writeRec)->setOctet(1);
+    } else if(isLiving && n > 3) {
+      writeLayer->at(i, writeRec)->setOctet(0);
+    } else if(!isLiving && n == 3) {
+      writeLayer->at(i, writeRec)->setOctet(1);
+    } else {
+      writeLayer->at(i, writeRec)->setOctet(isLiving);
+    }
+  }
+}
+
+
+void CellAutomataAgent::ant(PPtr<KGridBasic> readLayer,
+    PPtr<KGridBasic> writeLayer, int phase)
+{
+  Ptr<KRecord> readRec = new KRecord(readLayer.AS(KGrid));
+  Ptr<KRecord> writeRec = new KRecord(writeLayer.AS(KGrid));
+  
+  if(phase == 0) {
+    _antLocation.at(0) = rand()%_computeRange.getSize().at(0) + _computeRange.getBegin().at(0);
+    _antLocation.at(1) = rand()%_computeRange.getSize().at(1) + _computeRange.getBegin().at(1);
+    _antDirection = rand()%4;
+    return;
+  }
+  
+  writeLayer->copyFrom(readLayer.AS(KGrid), Tuple2D::ZERO, Tuple2D::ZERO, readLayer->getRange().getSize());
+  
+  if(readLayer->at(_antLocation, readRec)->getOctet()) {
+    _antDirection++;
+    if(_antDirection == 4) {
+      _antDirection = 0;
+    }
+    writeLayer->at(_antLocation, writeRec)->setOctet(0);
+  } else {
+    _antDirection--;
+    if(_antDirection == -1) {
+      _antDirection = 4;
+    }
+    writeLayer->at(_antLocation, writeRec)->setOctet(1);
+  }
+  
+  Tuple2D move;
+  switch (_antDirection) {
+    case 0:
+      move.set(0, -1);
+      break;
+      
+    case 1:
+      move.set(1, 0);
+      break;
+      
+    case 2:
+      move.set(0, 1);
+      break;
+      
+    case 3:
+    default:
+      move.set(-1, 0);
+  }
+  
+  _antLocation = _antLocation + move;
+  if(!_computeRange.contains(_antLocation)) {
+    _antLocation.at(0) = rand()%_computeRange.getSize().at(0) + _computeRange.getBegin().at(0);
+    _antLocation.at(1) = rand()%_computeRange.getSize().at(1) + _computeRange.getBegin().at(1);
   }
 }
 
@@ -575,7 +724,16 @@ void CellAutomataAgent::dump(PPtr<KGrid> g, int phase) {
 // Handlers //
 
 void CellAutomataAgent::handleOpStart(PPtr<Message> msg) {
-  _globalSize = KPoint(msg->getPayload().AS(KRecord));
+  PPtr<KRecord> r = msg->getPayload().AS(KRecord);
+  
+  _problem = (problem_t)r->getEnumerationOrdinal(0);
+  if(_problem == BRAIN) {
+    _pPixmap.setFormat(PixmapOutputProtocol::COLOR_16);
+  } else {
+    _pPixmap.setFormat(PixmapOutputProtocol::BLACK_AND_WHITE);
+  }
+  
+  _globalSize = KPoint(r->getInteger(1), r->getInteger(2));
   _pGrouping.start();
 }
 
@@ -651,6 +809,7 @@ bool CellAutomataAgent::isAlive() {
 
 
 void CellAutomataAgent::finalize() {
+  ALOG << "Finalizing" << EL;
   _stopFlag = true;
   _borderCond.release();
   Agent::finalize();

@@ -56,9 +56,9 @@ class CellAutomataAgent : public Agent {
 // --- NESTED TYPES --- //
   
   private: typedef enum {
-    LIFE = 0,
-    SMOOTH_LIFE = 1,
-    ROCK_PAPER_SCISORS = 3
+    LIFE  = 0,
+    BRAIN = 1,
+    ANT   = 2
   } problem_t;
 
   
@@ -90,6 +90,12 @@ class CellAutomataAgent : public Agent {
   };
   
   
+  private: class PConsole : public ConsoleProtocolClient {
+    public: PConsole(Agent* agent);
+    public: void onInputReceived(PPtr<KString> str);
+  };
+  
+  
   private: class ComputeThread : public Thread {
     private: CellAutomataAgent& _iAgent;
     public: ComputeThread(CellAutomataAgent& agent);
@@ -99,6 +105,7 @@ class CellAutomataAgent : public Agent {
   
 // --- STATIC FIELDS --- //
   
+  private: static SPtr<KRecordType> START_T;
   private: static SPtr<KGridType> PARTITION_MAP_T;
   private: static SPtr<KGridType> CELL_GRID_T;
   private: static SPtr<KRecordType> BORDER_T;
@@ -115,6 +122,7 @@ class CellAutomataAgent : public Agent {
   
 // --- STATIC METHODS --- //
   
+  public: static SPtr<KRecordType> start_t();
   public: static SPtr<KGridType> partition_map_t();
   public: static SPtr<KGridType> cell_grid_t();
   public: static SPtr<KRecordType> border_t();
@@ -131,7 +139,7 @@ class CellAutomataAgent : public Agent {
   private: Ptr<KGridBasic> _layer1;
   private: Ptr<KGridBasic> _layer2;
   private: DisplayInfoProtocol _pDisplayInfo;
-  private: ConsoleProtocolClient _pConsole;
+  private: PConsole _pConsole;
   private: PixmapOutputProtocol _pPixmap;
   private: Condition _borderCond;
   private: Tuple _globalToLocal;
@@ -139,6 +147,9 @@ class CellAutomataAgent : public Agent {
   private: PGrouping _pGrouping;
   private: KPoint _globalSize;
   private: int _delay;
+  private: problem_t _problem;
+  private: Tuple _antLocation;
+  private: kf_int8_t _antDirection;
   private: bool _readFromLayer1;
   private: bool _stopFlag;
   
@@ -154,6 +165,10 @@ class CellAutomataAgent : public Agent {
   private: void setupLayers();
   private: void computeLoop();
   private: void exchangeBorders(int phase);
+  private: void evaluate(PPtr<KGridBasic> readLayer, PPtr<KGridBasic> writeLayer, int pahse);
+  private: void gameOfLife(PPtr<KGridBasic> readLayer, PPtr<KGridBasic> writeLayer, int phase);
+  private: void ant(PPtr<KGridBasic> readLayer, PPtr<KGridBasic> writeLayer, int phase);
+  private: void brianBrain(PPtr<KGridBasic> readLyer, PPtr<KGridBasic> writeLayer, int phase);
   private: void dump(PPtr<KGrid> g, int phase);
   
   // Handlers //

@@ -31,8 +31,8 @@ namespace demo {
   SPtr<KRecordType> Rectangle::type() {
     if(TYPE.isNull()) {
       TYPE = new KRecordType("knorba.demo.Rect");
-      TYPE->addField("begin", Rectangle::type().AS(KType))
-      ->addField("end", Rectangle::type().AS(KType));
+      TYPE->addField("begin", Point::type().AS(KType))
+      ->addField("end", Point::type().AS(KType));
     }
     return TYPE;
   }

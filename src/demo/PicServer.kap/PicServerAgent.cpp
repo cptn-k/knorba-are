@@ -23,6 +23,7 @@
 
 // KnoRBA
 #include <knorba/Agent.h>
+#include <knorba/Group.h>
 #include <knorba/type/all.h>
 #include <knorba/protocol/GroupingProtocol.h>
 #include <knorba/protocol/DisplayInfoProtocol.h>
@@ -46,7 +47,7 @@ PicServerAgent::PGrouping::PGrouping(PicServerAgent* owner)
 
 
 void PicServerAgent::PGrouping::onAllMembersConnected() {
-  // Nothing yet
+  LOG << "All peers connected: " << *_agent->getPeers(PicServerAgent::R_MATE) << EL;
 }
 
 
@@ -76,6 +77,7 @@ const SPtr<KString> PicServerAgent::R_MATE = KS("mate");
 
 PicServerAgent::PicServerAgent(Runtime& rt, const k_guid_t& guid)
 : Agent(rt, guid),
+  _pGrouping(this),
   _pDisplayInfo(this)
 {
   _jarRunnerThread = new JarRunnerThread(this);
@@ -84,6 +86,7 @@ PicServerAgent::PicServerAgent(Runtime& rt, const k_guid_t& guid)
   registerHandler((handler_t)&PicServerAgent::handleOpLoad, PicProtocol::OP_LOAD);
   registerHandler((handler_t)&PicServerAgent::handleOpPut, PicProtocol::OP_PUT);
   registerHandler((handler_t)&PicServerAgent::handleOpUnput, PicProtocol::OP_UNPUT);
+  registerHandler((handler_t)&PicServerAgent::handleOpQuit, PicProtocol::OP_QUIT);
 }
 
 
@@ -135,16 +138,16 @@ void PicServerAgent::runJar() {
     
     const Range& rect = _pDisplayInfo.getLocalInfo()->getRect();
     const Tuple& origin = _pDisplayInfo.getWindowOrigin();
-    
+
     stringstream sstr;
     sstr << 'w' << origin.at(0) << ' ' << origin.at(1)
-    << ' ' << rect.getBegin().at(0) << ' ' << rect.getBegin().at(1)
-    << ' ' << rect.getSize().at(0) << ' ' << rect.getSize().at(1) << '#';
-    
+      << ' ' << rect.getBegin().at(0) << ' ' << rect.getBegin().at(1)
+      << ' ' << rect.getSize().at(0) << ' ' << rect.getSize().at(1) << '#';
+
     writeToPipe(sstr.str());
     
     _uiReady = true;
-    
+
     int status;
     ::wait(&status);
     
@@ -171,6 +174,7 @@ void PicServerAgent::writeToPipe(const string& str) {
 // Handlers //
 
 void PicServerAgent::handleOpStart(PPtr<Message> msg) {
+  _pGrouping.start();
   _jarRunnerThread->start();
 }
 
@@ -178,34 +182,67 @@ void PicServerAgent::handleOpStart(PPtr<Message> msg) {
 void PicServerAgent::handleOpLoad(PPtr<Message> msg) {
   PPtr<KRecord> r = msg->getPayload().AS(KRecord);
   
-  Ptr<Path> path = getPathToData()->addSegement(
-      r->getString(PicProtocol::LOAD_T_FILENAME)->toUtf8String());
+  if(r->getTruth(PicProtocol::LOAD_T_RELAY) == T) {
+    r->setTruth(PicProtocol::LOAD_T_RELAY, F);
+    send(R_MATE, PicProtocol::OP_LOAD, r.AS(KValue));
+  }
+  
+  k_integer_t ref = r->getInteger(PicProtocol::LOAD_T_REFERENCE);
+  Ptr<Path> srcPath = new Path(r->getString(PicProtocol::LOAD_T_FILENAME)->toUtf8String());
+  
+  Ptr<Path> path = getPathToData()->addSegement(Int::toString(ref))
+      ->changeExtension(srcPath->getExtention());
   
   r->getRaw(PicProtocol::LOAD_T_DATA)->writeDataToFile(path);
   
   stringstream sstr;
-  sstr << 'l' << r->getInteger(PicProtocol::LOAD_T_REFERENCE) << ' '
-      << path->getString() << '#';
+  sstr << 'l' << ref << ' ' << path->getString() << '#';
   
   writeToPipe(sstr.str());
+  
+  if(msg->needsResponse()) {
+    respond(msg, OP_ACK, KValue::NOTHING);
+  }
 }
 
 
 void PicServerAgent::handleOpPut(PPtr<Message> msg) {
   PPtr<KRecord> r = msg->getPayload().AS(KRecord);
+  
+  if(r->getTruth(PicProtocol::PUT_T_RELAY) == T) {
+    r->setTruth(PicProtocol::PUT_T_RELAY, F);
+    send(R_MATE, PicProtocol::OP_PUT, r.AS(KValue));
+  }
+  
   Rectangle rect(r->getRecord(PicProtocol::PUT_T_AREA));
   
   stringstream sstr;
   sstr << 'p' << r->getInteger(PicProtocol::PUT_T_REFERENCE)
     << ' ' << rect.getBegin().at(0) << ' ' << rect.getBegin().at(1)
-    << ' ' << rect.getEnd().at(0) << ' ' << rect.getEnd().at(1) << '#';
+    << ' ' << rect.getSize().at(0) << ' ' << rect.getSize().at(1) << '#';
   
   writeToPipe(sstr.str());
 }
 
 
 void PicServerAgent::handleOpUnput(PPtr<Message> msg) {
-  writeToPipe('d' + msg->getPayload().AS(KInteger)->toString() + '#');
+  PPtr<KRecord> r = msg->getPayload().AS(KRecord);
+  if(r->getTruth(PicProtocol::UNPUT_T_RELAY) == T) {
+    r->setTruth(PicProtocol::UNPUT_T_RELAY, F);
+    send(R_MATE, PicProtocol::OP_UNPUT, r.AS(KValue));
+  }
+  
+  writeToPipe('d' + Int::toString(r->getInteger(PicProtocol::UNPUT_T_REFERENCE)) + '#');
+}
+
+
+void PicServerAgent::handleOpQuit(PPtr<Message> msg) {
+  PPtr<KTruth> t = msg->getPayload().AS(KTruth);
+  if(t->get() == T) {
+    t->set(F);
+    send(R_MATE, PicProtocol::OP_QUIT, t.AS(KValue));
+  }
+  quit();
 }
 
 
@@ -213,8 +250,10 @@ void PicServerAgent::handleOpUnput(PPtr<Message> msg) {
 
 void PicServerAgent::finalize() {
   if(_childId > 0) {
+    writeToPipe("q#");
     close(_pipe[WRITE_END]);
     kill(_childId, SIGTERM);
+    ALOG << "Tried to close the Java app" << EL;
   }
   Agent::finalize();
 }

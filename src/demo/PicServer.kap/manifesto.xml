@@ -1,5 +1,10 @@
 <Manifesto>
   <Load class="PicServerAgent" />
   <Load class="PicClientAgent" />
+  <Run class="PicServerAgent" alias="server" />
   <Run class="PicClientAgent" alias="client" />
+  <Message target="server" opcode="knorba.demo.pic.server.start">
+    <KNothing/>
+  </Message>
+  <Connect source="server" target="client" role="server" />
 </Manifesto>

@@ -126,6 +126,8 @@ UiGridOutputAgent::UiGridOutputAgent(Runtime& rt, const k_guid_t& guid)
 : Agent(rt, guid),
   _pDisplayInfo(this)
 {
+  setPassive();
+  
   _uiReady = false;
   _isWindowSet = false;
   _isUiRunning = false;
@@ -144,9 +146,9 @@ void UiGridOutputAgent::generateColorMaps() {
   _colorMapBW[1].set(40, 40, 255);
   
   // Color 16
-	_colorMap16[0].set(0, 0, 0);
+	_colorMap16[0].set(255, 255, 255);
 	_colorMap16[1].set(157, 157, 157);
-	_colorMap16[2].set(255, 255, 255);
+	_colorMap16[2].set(0, 0, 255);
 	_colorMap16[3].set(190, 38, 51);
 	_colorMap16[4].set(224, 111, 139);
 	_colorMap16[5].set(73, 60, 43);

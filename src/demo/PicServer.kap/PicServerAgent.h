@@ -51,6 +51,7 @@ class PicServerAgent : public Agent {
 
 // --- FIELDS --- //
   
+  private: PGrouping _pGrouping;
   private: DisplayInfoProtocol _pDisplayInfo;
   private: Ptr<JarRunnerThread> _jarRunnerThread;
   private: int _pipe[2];
@@ -74,6 +75,7 @@ class PicServerAgent : public Agent {
   public: void handleOpLoad(PPtr<Message> msg);
   public: void handleOpPut(PPtr<Message> msg);
   public: void handleOpUnput(PPtr<Message> msg);
+  public: void handleOpQuit(PPtr<Message> msg);
   
   // Inherited from Agent //
   public: void finalize();
