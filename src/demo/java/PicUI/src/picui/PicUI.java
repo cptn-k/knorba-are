@@ -280,7 +280,7 @@ public class PicUI {
         
         double physicalToVirtualFactorW = (double)_virtualRect.getWidth() / (double)_physicalRect.getWidth();
         double physicalToVirtualFactorH = (double)_virtualRect.getHeight() / (double)_virtualRect.getHeight();
-                
+        
         for(int i = 0; i < _frames.length; i++) {
             GraphicsConfiguration conf = screens[i].getDefaultConfiguration();
             Rectangle physicalRect = conf.getBounds();
@@ -290,7 +290,7 @@ public class PicUI {
                     _virtualRect.y + (int)(physicalRect.y * physicalToVirtualFactorH),
                     (int)(_virtualRect.width * physicalToVirtualFactorW),
                     (int)(_virtualRect.height * physicalToVirtualFactorH));
-                    
+                                
             _frames[i] = new UiFrame(conf, virtualRect);
         }
         

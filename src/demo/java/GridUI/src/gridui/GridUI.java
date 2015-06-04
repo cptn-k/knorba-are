@@ -12,7 +12,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Vector;
 import javax.swing.*;
 
 /**
@@ -195,12 +197,26 @@ public class GridUI {
         GraphicsEnvironment gr = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice[] screens = gr.getScreenDevices();
         
-        _frames = new UiFrame[screens.length];
+        // _frames = new UiFrame[screens.length];
         
-        for(int i = 0; i < _frames.length; i++) {
+        ArrayList<UiFrame> v = new ArrayList<UiFrame>();
+        
+        for(int i = 0; i < screens.length; i++) {
             GraphicsConfiguration conf = screens[i].getDefaultConfiguration();
-            _frames[i] = new UiFrame(conf);
+            boolean isNew = true;
+            
+            for(int j = 0; j < i; j++) {
+                if(!conf.getBounds().intersection(_frames[j].getBounds()).isEmpty()) {
+                    isNew = false;
+                }
+            }
+            
+            if(isNew) {
+                v.add(new UiFrame(conf));
+            }
         }
+        
+        _frames = v.toArray(_frames);
         
         Comparator<UiFrame> c = new Comparator() {
             @Override
