@@ -22,11 +22,16 @@ class PicClientAgent : public Agent {
   
   private: class PConsole : public ConsoleProtocolClient {
     private: PicClientAgent* _iAgent;
+    private: bool _displayInfoReady;
     public: PConsole(PicClientAgent* agent);
     public: void onInputReceived(PPtr<KString> input);
+    private: void parseLine(PPtr<PredictiveParserBase> parser);
     private: void load(PPtr<PredictiveParserBase> parser, k_integer_t ref);
     private: void put(PPtr<PredictiveParserBase> parser, k_integer_t ref);
+    private: void putindex(PPtr<PredictiveParserBase> parser, k_integer_t ref);
     private: void unput(PPtr<PredictiveParserBase> parser, k_integer_t ref);
+    private: void delay(PPtr<PredictiveParserBase> parser);
+    private: void play(PPtr<PredictiveParserBase> parser);
     private: void help();
   };
 
@@ -39,6 +44,7 @@ class PicClientAgent : public Agent {
 // --- FIELDS --- //
   
   private: PConsole _pConsole;
+  private: DisplayInfoProtocol _pDisplay;
   private: k_guid_t _server;
 
   

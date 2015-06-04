@@ -27,6 +27,7 @@
 #include <knorba/type/all.h>
 #include <knorba/protocol/GroupingProtocol.h>
 #include <knorba/protocol/DisplayInfoProtocol.h>
+#include <knorba/protocol/PhaserProtocol.h>
 
 
 // Internal
@@ -78,7 +79,8 @@ const SPtr<KString> PicServerAgent::R_MATE = KS("mate");
 PicServerAgent::PicServerAgent(Runtime& rt, const k_guid_t& guid)
 : Agent(rt, guid),
   _pGrouping(this),
-  _pDisplayInfo(this)
+  _pDisplayInfo(this),
+  _pPhaser(this, R_MATE)
 {
   _jarRunnerThread = new JarRunnerThread(this);
   
@@ -120,11 +122,12 @@ void PicServerAgent::runJar() {
     
     const char* command = "java";
     
-    char* args[5];
+    char* args[10];
     args[0] = cstr(command);
-    args[1] = cstr("-jar");
-    args[2] = cstr(jarPath->getString());
-    args[3] = NULL;
+    args[1] = cstr("-Xms300m");
+    args[2] = cstr("-jar");
+    args[3] = cstr(jarPath->getString());
+    args[4] = NULL;
     
     execvp(command, args);
     perror("execvp()");
@@ -184,7 +187,7 @@ void PicServerAgent::handleOpLoad(PPtr<Message> msg) {
   
   if(r->getTruth(PicProtocol::LOAD_T_RELAY) == T) {
     r->setTruth(PicProtocol::LOAD_T_RELAY, F);
-    send(R_MATE, PicProtocol::OP_LOAD, r.AS(KValue));
+    tsend(R_MATE, PicProtocol::OP_LOAD, r.AS(KValue));
   }
   
   k_integer_t ref = r->getInteger(PicProtocol::LOAD_T_REFERENCE);

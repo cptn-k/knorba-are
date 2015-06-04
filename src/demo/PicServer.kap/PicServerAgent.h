@@ -53,6 +53,7 @@ class PicServerAgent : public Agent {
   
   private: PGrouping _pGrouping;
   private: DisplayInfoProtocol _pDisplayInfo;
+  private: PhaserProtocol _pPhaser;
   private: Ptr<JarRunnerThread> _jarRunnerThread;
   private: int _pipe[2];
   private: int _childId;
