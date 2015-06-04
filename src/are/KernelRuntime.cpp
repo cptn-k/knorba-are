@@ -167,10 +167,7 @@ namespace are {
   
   
   void KernelRuntime::runBundleInMainThread(PPtr<VirtualRuntime> rt, PPtr<Bundle> b) {
-    _runParam = new RunParam();
-    _runParam->rt = rt;
-    _runParam->bundle = b;
-    signalQuit();
+    LOG_ERR << "runBundleInMainThread()" << EL;
   }
 
   
@@ -281,18 +278,6 @@ namespace are {
   
   
   void KernelRuntime::cleanup() {
-    if(!_runParam.isNull()) {
-      cout << Thread::getNameOfCurrentThread() << endl;
-      try {
-        _runParam->rt->runBundle(_runParam->bundle);
-      } catch (KFException& e) {
-        LOG_ERR << e.getMessage() << EL;
-        LOG << e << EL;
-      }
-      _runParam = NULL;
-      return;
-    }
-    
     for(int i = _virtualRuntimes->getSize() - 1; i >= 0; i--) {
       if(_virtualRuntimes->at(i)->isReadyToDelete()) {
         k_guid_t guid = _virtualRuntimes->at(i)->getGuid();
