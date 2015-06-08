@@ -40,9 +40,7 @@ public class PicUI {
     // --- FIELDS --- //
         
         private HashMap<Integer, ImageRecord> _images;
-        private Rectangle _globalRect;
-        private double _globalToLocalScaleX;
-        private double _globalToLocalScaleY;
+        private final Rectangle _globalRect;
         private int _globalToLocalTranslateX;
         private int _globalToLocalTranslateY;
         
@@ -69,9 +67,6 @@ public class PicUI {
             _globalToLocalTranslateX = - _globalRect.x;
             _globalToLocalTranslateY = - _globalRect.y;
             
-            _globalToLocalScaleX = _globalRect.getWidth() / bounds.getWidth();
-            _globalToLocalScaleY = _globalRect.getHeight() / bounds.getHeight();
-
             KeyListener keyListener = new KeyListener() {
 
                 @Override
@@ -119,10 +114,9 @@ public class PicUI {
             }
             
             r.viewRect = new Rectangle(
-                    (int)((globalRect.x + _globalToLocalTranslateX) * _globalToLocalScaleX),
-                    (int)((globalRect.y + _globalToLocalTranslateY) * _globalToLocalScaleY), 
-                    (int)(globalRect.width * _globalToLocalScaleX),
-                    (int)(globalRect.height * _globalToLocalScaleY));
+                    globalRect.x + _globalToLocalTranslateX,
+                    globalRect.y + _globalToLocalTranslateY,
+                    globalRect.width, globalRect.height);
             
             double widthRatio = r.image.getWidth() / r.viewRect.getWidth();
             double heightRatio = r.image.getHeight() / r.viewRect.getHeight();
@@ -277,20 +271,19 @@ public class PicUI {
             GraphicsConfiguration conf = screens[i].getDefaultConfiguration();
             _physicalRect = _physicalRect.union(conf.getBounds());
         }
-        
-        double physicalToVirtualFactorW = (double)_virtualRect.getWidth() / (double)_physicalRect.getWidth();
-        double physicalToVirtualFactorH = (double)_virtualRect.getHeight() / (double)_virtualRect.getHeight();
-        
+                
         for(int i = 0; i < _frames.length; i++) {
             GraphicsConfiguration conf = screens[i].getDefaultConfiguration();
             Rectangle physicalRect = conf.getBounds();
             
             Rectangle virtualRect = new Rectangle(
-                    _virtualRect.x + (int)(physicalRect.x * physicalToVirtualFactorW),
-                    _virtualRect.y + (int)(physicalRect.y * physicalToVirtualFactorH),
-                    (int)(_virtualRect.width * physicalToVirtualFactorW),
-                    (int)(_virtualRect.height * physicalToVirtualFactorH));
-                                
+                    _virtualRect.x + physicalRect.x,
+                    _virtualRect.y + physicalRect.y,
+                    _virtualRect.width,
+                    _virtualRect.height);
+            
+            System.out.println("virtualRect[" + i + "]: " + virtualRect);
+            
             _frames[i] = new UiFrame(conf, virtualRect);
         }
         
