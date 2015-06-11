@@ -19,17 +19,7 @@ class HelloAgent : public Agent {
   
 // --- STATIC FIELS --- //
   
-  private: static SPtr<KEnumerationType> TASTE_T;
-  private: static SPtr<KRecordType> COLOR_T;
-  private: static SPtr<KRecordType> APPLE_T;
   public: static const SPtr<KString> OP_SAY;
-  
-  
-// --- STATIC METHODS --- //
-
-  public: static SPtr<KEnumerationType> taste_t();
-  public: static SPtr<KRecordType> color_t();
-  public: static SPtr<KRecordType> apple_t();
   
   
 // --- FIELDS --- //
