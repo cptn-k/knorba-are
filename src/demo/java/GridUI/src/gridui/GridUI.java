@@ -205,8 +205,8 @@ public class GridUI {
             GraphicsConfiguration conf = screens[i].getDefaultConfiguration();
             boolean isNew = true;
             
-            for(int j = 0; j < i; j++) {
-                if(!conf.getBounds().intersection(_frames[j].getBounds()).isEmpty()) {
+            for(int j = 0; j < v.size(); j++) {
+                if(conf.getBounds().intersects(v.get(j).getBounds())) {
                     isNew = false;
                 }
             }
@@ -216,6 +216,7 @@ public class GridUI {
             }
         }
         
+        _frames = new UiFrame[v.size()];
         _frames = v.toArray(_frames);
         
         Comparator<UiFrame> c = new Comparator() {
